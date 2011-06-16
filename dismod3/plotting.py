@@ -933,8 +933,11 @@ def plot_posterior_predicted_checks(dm, key):
     n = len(vars['observed_counts'].value)
     k = len(vars['predicted_rates'].trace())
 
+    print "observed_counts = %d, predicted_rates = %d" % (n,k)
 
-    pl.figure(figsize=(max(6, .75*n), 8))
+    pl.figure(figsize=(min(max(6, .75*n),300), 8))
+
+#    pl.figure(figsize=(max(6, .75*n), 8))
 
     observed_rates = pl.array(vars['observed_counts'].value)/vars['effective_sample_size']
     observed_std = pl.sqrt(observed_rates * (1 - observed_rates) / vars['effective_sample_size'])
