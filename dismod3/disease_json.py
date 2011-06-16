@@ -79,11 +79,15 @@ class DiseaseJson:
         """ save figure in png subdir"""
         debug('saving figure %s' % fname)
         dir = JOB_WORKING_DIR % self.id
-        from pylab import savefig
+        from pylab import savefig, close
         try:
             savefig('%s/image/%s' % (dir, fname))
         except:
-            debug('saving figure failed')
+            debug('saving figure failed: %s/image/%s' % (dir, fname))
+            f = open('%s/image/%s.txt' % (dir, fname), "w") 
+	    f.write("ok\n")
+	    f.close()
+        close()
 
     def set_region(self, region):
         """ Set the region of the disease model"""
@@ -586,6 +590,7 @@ import os
 import random
 
 def random_rename(fname):
+    print "random rename %s"%fname
     os.rename(fname, fname + str(random.random())[1:])
 
 def create_disease_model_dir(id):
