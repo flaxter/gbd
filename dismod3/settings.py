@@ -1,11 +1,11 @@
 
 # over-ride these in the local_settings file appropriately
 
-DISMOD_BASE_URL = 'http://127.0.0.1:8000/'
+DISMOD_BASE_URL = 'http://winthrop.ihme.washington.edu/' #http://127.0.0.1:8000/'
 
 
-DISMOD_USERNAME = 'cjm'
-DISMOD_PASSWORD = 'kuma'
+DISMOD_USERNAME = 'flaxter'
+DISMOD_PASSWORD = 'who42'
 
 DISMOD_TWITTER_NAME = 'ihme_dismod'
 DISMOD_TWITTER_PASSWORD = 's3cr3t_p4sswd'
@@ -29,17 +29,17 @@ SERVER_LOAD_STATUS_SIZE = 20480
 # path to job working directory
 # dir = JOB_WORKING_DIR % id
 #JOB_WORKING_DIR = '../../dismod_status/test/dm-%d'
-JOB_WORKING_DIR = '/var/tmp/dismod_working/test/dm-%d'
+JOB_WORKING_DIR = '/home/OUTPOST/sflaxman/dismod_working/dm-%d'
 
 # path to job log directory
 # dir = JOB_LOG_DIR % id
-JOB_LOG_DIR = '/var/tmp/dismod_log/test/dm-%d'
+JOB_LOG_DIR = '/home/OUTPOST/sflaxman/dismod_log/dm-%d'
 
 # path and name of daemon log file
-DAEMON_LOG_FILE = '/var/tmp/daemon_test.log'
+DAEMON_LOG_FILE = '/home/OUTPOST/sflaxman/daemon_test.log'
 
 # path and name of gbd_fit lock file
-GBD_FIT_LOCK_FILE = '/var/tmp/gbd_fit_test.lock'
+GBD_FIT_LOCK_FILE = '/home/OUTPOST/sflaxman/gbd_fit_test.lock'
 
 # shell command string to spawn a fit process
 GBD_FIT_STR = 'python gbd_fit.py %s %d >%s 2>%s'
