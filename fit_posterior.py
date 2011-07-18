@@ -1,10 +1,10 @@
 #!/usr/bin/python2.5
-""" Generate a posterior estimate for a specific region, sex, and year
+""" Generate a posterior estimate for a specific region, sex, and year -- PREVALENCE ONLY
 
 Examples
 --------
 
-$ python fit_posterior.py 3828 -r australasia -s male -y 2005 
+$ python fit_posterior_prevonly.py 3828 -r australasia -s male -y 2005 
 
 >>> # ipython example
 >>> from fit_posterior import *
@@ -49,7 +49,7 @@ def fit_posterior(id, region, sex, year):
 
     dm = dismod3.load_disease_model(id)
     #dm.data = []  # for testing, remove all data
-    keys = dismod3.utils.gbd_keys(region_list=[region], year_list=[year], sex_list=[sex])
+    keys = dismod3.utils.gbd_keys(region_list=[region], year_list=[year], sex_list=[sex], type_list=['prevalence'])
 
     # fit the model
     dir = dismod3.settings.JOB_WORKING_DIR % id
@@ -76,7 +76,7 @@ def fit_posterior(id, region, sex, year):
 
 
     # make a rate_type_list
-    rate_type_list = ['incidence', 'prevalence', 'remission', 'excess-mortality', 'mortality', 'duration']
+    rate_type_list = ['prevalence']
     # save country level posterior
     save_country_level_posterior(dm, region, year, sex, rate_type_list)
 
@@ -116,7 +116,7 @@ def save_country_level_posterior(dm, region, year, sex, rate_type_list):
     # get covariate dict from dm
     covariates_dict = dm.get_covariates()
     derived_covariate = dm.get_derived_covariate_values()
-    
+
     # job working directory
     job_wd = dismod3.settings.JOB_WORKING_DIR % dm.id
 
@@ -182,6 +182,7 @@ def save_country_level_posterior(dm, region, year, sex, rate_type_list):
                     value_list[:, i] = value_trace
             if rate_type == 'prevalence':
                 print key, iso3, nbm.country_covariates(key, iso3, covariates_dict, derived_covariate)[1], np.sort(value_list, axis=1)[5, .5*sample_size]
+
                                 
             # write a row
             for age in range(dismod3.MAX_AGE):
