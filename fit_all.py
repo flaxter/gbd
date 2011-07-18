@@ -76,7 +76,7 @@ def fit_all(id):
                 call_str = 'qsub -cwd -o %s -e %s ' % (o,e) \
                            + hold_str \
                            + '-N %s ' % name_str \
-                           + 'run_on_cluster.sh fit_posterior_prevonly.py %d -r %s -s %s -y %s' % (id, clean(r), s, y)
+                           + 'run_on_cluster.sh fit_posterior.py %d -r %s -s %s -y %s' % (id, clean(r), s, y)
                 subprocess.call(call_str, shell=True)
 
     # after all posteriors have finished running, upload disease model json
