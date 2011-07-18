@@ -46,12 +46,12 @@ def fit_all(id):
     # fit empirical priors (by pooling data from all regions)
     dir = dismod3.settings.JOB_WORKING_DIR % id  # TODO: refactor into a function
     emp_names = []
-    for t in ['excess-mortality', 'remission', 'incidence', 'prevalence']:
+    for t in ['prevalence']:
         o = '%s/empirical_priors/stdout/%s' % (dir, t)
         e = '%s/empirical_priors/stderr/%s' % (dir, t)
         name_str = '%s-%d' %(t[0], id)
         emp_names.append(name_str)
-        call_str = 'qsub -P ihme_dismod -cwd -o %s -e %s ' % (o, e) \
+        call_str = 'qsub -cwd -o %s -e %s ' % (o, e) \
                         + '-N %s ' % name_str \
                         + 'run_on_cluster.sh fit_emp_prior.py %d -t %s' % (id, t)
         subprocess.call(call_str, shell=True)
@@ -73,17 +73,17 @@ def fit_all(id):
                 e = '%s/posterior/stderr/%s' % (dir, k)
                 name_str = '%s%d%s%s%d' % (r[0], ii+1, s[0], str(y)[-1], id)
                 post_names.append(name_str)
-                call_str = 'qsub -P ihme_dismod -cwd -o %s -e %s ' % (o,e) \
+                call_str = 'qsub -cwd -o %s -e %s ' % (o,e) \
                            + hold_str \
                            + '-N %s ' % name_str \
-                           + 'run_on_cluster.sh fit_posterior.py %d -r %s -s %s -y %s' % (id, clean(r), s, y)
+                           + 'run_on_cluster.sh fit_posterior_prevonly.py %d -r %s -s %s -y %s' % (id, clean(r), s, y)
                 subprocess.call(call_str, shell=True)
 
     # after all posteriors have finished running, upload disease model json
     hold_str = '-hold_jid %s ' % ','.join(post_names)
     o = '%s/upload.stdout' % dir
     e = '%s/upload.stderr' % dir
-    call_str = 'qsub -P ihme_dismod -cwd -o %s -e %s ' % (o,e) \
+    call_str = 'qsub -cwd -o %s -e %s ' % (o,e) \
                + hold_str \
                + '-N upld-%s ' % id \
                + 'run_on_cluster.sh upload_fits.py %d' % id
@@ -102,8 +102,8 @@ def main():
     except ValueError:
         parser.error('disease_model_id must be an integer')
 
-    if not dismod3.settings.ON_SGE:
-        parser.error('dismod3.settings.ON_SGE must be true to fit_all automatically')
+#    if not dismod3.settings.ON_SGE:
+#        parser.error('dismod3.settings.ON_SGE must be true to fit_all automatically')
 
     fit_all(id)
 
