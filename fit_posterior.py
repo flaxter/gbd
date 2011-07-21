@@ -26,6 +26,7 @@ import dismod3.neg_binom_model as nbm
 import numpy as np
 
 import dismod3
+import pymc as mc
 
 def fit_posterior(id, region, sex, year):
     """ Fit posterior of specified region/sex/year for specified model
@@ -53,32 +54,15 @@ def fit_posterior(id, region, sex, year):
 
     # fit the model
     dir = dismod3.settings.JOB_WORKING_DIR % id
-    import dismod3.gbd_disease_model as model
-    model.fit(dm, method='map', keys=keys, verbose=1)     ## first generate decent initial conditions
-    ## then sample the posterior via MCMC
-    model.fit(dm, method='mcmc', keys=keys, iter=100000, thin=50, burn=50000, verbose=1, dbname='/dev/null')  # dbname was '%s/posterior/pickle/dm-%d-posterior-%s-%s-%s.pickle' % (dir, id, region, sex, year)
-    #model.fit(dm, method='mcmc', keys=keys, iter=1000, thin=1, burn=500, verbose=1, dbname='/dev/null') # fast, for rapid development
-
-    # generate plots of results
-    dismod3.tile_plot_disease_model(dm, keys, defaults={})
-    dm.savefig('dm-%d-posterior-%s.png' % (id, '+'.join(['all', region, sex, year])))  # TODO: refactor naming into its own function (disease_json.save_image perhaps)
-    for param_type in dismod3.settings.output_data_types:
-        keys = dismod3.utils.gbd_keys(region_list=[region], year_list=[year], sex_list=[sex], type_list=[param_type])
-        dismod3.tile_plot_disease_model(dm, keys, defaults={})
-        dm.savefig('dm-%d-posterior-%s-%s-%s-%s.png' % (id, dismod3.utils.clean(param_type), region, sex, year))   # TODO: refactor naming into its own function
-
-
-    # summarize fit quality graphically, as well as parameter posteriors
-    for k in dismod3.utils.gbd_keys(region_list=[region], year_list=[year], sex_list=[sex]):
-        if dm.vars[k].get('data'):
-            dismod3.plotting.plot_posterior_predicted_checks(dm, k)
-            dm.savefig('dm-%d-check-%s.png' % (dm.id, k))
-
-
-    # make a rate_type_list
-    rate_type_list = ['prevalence']
-    # save country level posterior
-    save_country_level_posterior(dm, region, year, sex, rate_type_list)
+    import dismod3.neg_binom_model as model
+    k0 = keys[0]
+    dm.vars = {}
+    dm.vars[k0] = model.setup(dm, k0, dm.data)
+    dm.mcmc = mc.MCMC(dm.vars)
+    dm.mcmc.sample(iter=50000,burn=25000,thin=50,verbose=1)
+    dm.map = mc.MAP(dm.vars)
+    dm.map.fit()
+    model.store_mcmc_fit(dm, k0, dm.vars[k0])
 
     # update job status file
     #print 'updating job status on server'
@@ -86,7 +70,7 @@ def fit_posterior(id, region, sex, year):
     #                       '%s--%s--%s' % (region, sex, year), 'Completed')
     
     # save results (do this last, because it removes things from the disease model that plotting function, etc, might need
-    keys = dismod3.utils.gbd_keys(region_list=[region], year_list=[year], sex_list=[sex])
+    keys = dismod3.utils.gbd_keys(region_list=[region], year_list=[year], sex_list=[sex], type_list=['prevalence'])
     dm.save('dm-%d-posterior-%s-%s-%s.json' % (id, region, sex, year), keys_to_save=keys)
 
     return dm
